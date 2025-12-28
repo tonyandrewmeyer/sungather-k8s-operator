@@ -16,20 +16,255 @@ logger = logging.getLogger(__name__)
 METADATA = yaml.safe_load(pathlib.Path("charmcraft.yaml").read_text())
 
 
-def test_deploy(charm: pathlib.Path, juju: jubilant.Juju):
-    """Deploy the charm under test."""
+def test_deploy_without_config(charm: pathlib.Path, juju: jubilant.Juju):
+    """Deploy the charm without configuration should result in blocked status."""
     resources = {
-        "some-container-image": METADATA["resources"]["some-container-image"]["upstream-source"]
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
     }
     juju.deploy(charm.resolve(), app="sungather", resources=resources)
-    juju.wait(jubilant.all_active)
+    # Wait for the charm to settle
+    juju.wait(jubilant.all_units)
+
+    # Without inverter-host configured, charm should be in blocked state
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status == "blocked"
+    assert "inverter-host is required" in status.apps["sungather"].units[0].workload_status.message
 
 
-# If you implement sungather.get_version in the charm source,
-# remove the @pytest.mark.skip line to enable this test.
-# Alternatively, remove this test if you don't need it.
-@pytest.mark.skip(reason="sungather.get_version is not implemented")
-def test_workload_version_is_set(charm: pathlib.Path, juju: jubilant.Juju):
-    """Check that the correct version of the workload is running."""
-    version = juju.status().apps["sungather"].version
-    assert version == "3.14"  # Replace 3.14 by the expected version of the workload.
+def test_deploy_with_config(charm: pathlib.Path, juju: jubilant.Juju):
+    """Deploy the charm with valid configuration."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    # Configure with a dummy inverter host (will fail to connect, but charm should start)
+    config = {
+        "inverter-host": "192.168.1.100",  # Dummy IP
+        "inverter-port": 502,
+        "connection-type": "modbus",
+        "scan-interval": 60,
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+
+    # Wait for deployment to complete
+    # Note: The service will start even if it can't connect to the inverter
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    # The charm should reach active or waiting status (not blocked due to config)
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status in ["active", "waiting"], f"Unexpected status: {unit_status}"
+
+
+def test_config_changed(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test that configuration changes are applied."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "scan-interval": 30,
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    # Update configuration
+    juju.config("sungather", {"scan-interval": "60"})
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status in ["active", "waiting"]
+
+
+def test_enable_mqtt_without_host(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test that enabling MQTT without host results in blocked status."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "enable-mqtt": True,
+        # mqtt-host not provided
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status == "blocked"
+    assert "mqtt-host" in status.apps["sungather"].units[0].workload_status.message.lower()
+
+
+def test_enable_mqtt_with_host(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test that enabling MQTT with host succeeds."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "enable-mqtt": True,
+        "mqtt-host": "mqtt.example.com",
+        "mqtt-topic": "solar/inverter",
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status in ["active", "waiting"]
+
+
+def test_run_once_action(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test the run-once action."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    # Run the action (it will fail to connect to the inverter, but the action should execute)
+    result = juju.run_action("sungather/0", "run-once")
+
+    # The action should complete (though it may report connection failure)
+    assert result.status in ["completed", "failed"]
+
+
+def test_get_inverter_info_action(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test the get-inverter-info action."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    # Run the action
+    result = juju.run_action("sungather/0", "get-inverter-info")
+
+    # The action should complete
+    assert result.status == "completed"
+    assert "status" in result.output or "config-path" in result.output
+
+
+def test_test_connection_action(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test the test-connection action."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    # Run the action (will fail to connect to dummy IP)
+    result = juju.run_action("sungather/0", "test-connection")
+
+    # The action should complete
+    assert result.status == "completed"
+    assert "status" in result.output
+
+
+def test_invalid_connection_type(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test that invalid connection type results in blocked status."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "connection-type": "invalid",
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status == "blocked"
+    assert "connection-type" in status.apps["sungather"].units[0].workload_status.message.lower()
+
+
+def test_invalid_level(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test that invalid level results in blocked status."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "level": 5,  # Invalid level (must be 1, 2, or 3)
+    }
+
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    status = juju.status()
+    unit_status = status.apps["sungather"].units[0].workload_status.status
+    assert unit_status == "blocked"
+    assert "level" in status.apps["sungather"].units[0].workload_status.message.lower()
