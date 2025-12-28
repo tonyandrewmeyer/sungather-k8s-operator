@@ -1,0 +1,172 @@
+# This file configures Charmcraft.
+# See https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/
+type: charm
+name: sungather
+title: SunGather
+summary: Collect and export data from Sungrow solar inverters via ModBus.
+description: |
+  SunGather is a data collection tool for Sungrow solar inverters.
+
+  The charm collects operational data from Sungrow inverters using ModBus
+  connections and exports it to multiple platforms including MQTT, InfluxDB,
+  PVOutput.org, and a built-in web interface.
+
+  It provides automatic inverter model detection, configurable scan intervals,
+  and smart meter support for household consumption calculations.
+
+  This charm is useful for solar power system owners, home automation enthusiasts,
+  and energy monitoring applications that need real-time inverter data.
+
+# Documentation:
+# https://documentation.ubuntu.com/charmcraft/stable/howto/build-guides/select-platforms/
+base: ubuntu@22.04
+platforms:
+  amd64:
+  arm64:
+
+parts:
+  charm:
+    plugin: uv
+    source: .
+    build-snaps:
+      - astral-uv
+
+config:
+  options:
+    # Inverter settings
+    inverter-host:
+      description: |
+        IP address or hostname of the Sungrow inverter.
+        This is required for the charm to connect to the inverter.
+      type: string
+    inverter-port:
+      description: |
+        Port for ModBus connection. Default is 502 for ModBus TCP,
+        use 8082 for HTTP connection.
+      default: 502
+      type: int
+    connection-type:
+      description: |
+        Connection type to the inverter.
+        Acceptable values are: "modbus", "sungrow", or "http"
+      default: "modbus"
+      type: string
+    inverter-model:
+      description: |
+        Specific inverter model (optional). If not provided, the model
+        will be auto-detected on first connection.
+      type: string
+    scan-interval:
+      description: |
+        Seconds between data collection cycles.
+      default: 30
+      type: int
+    smart-meter:
+      description: |
+        Enable smart meter for household consumption calculation.
+        Required for SG* models to calculate house consumption.
+      default: false
+      type: boolean
+    level:
+      description: |
+        Register level for data collection.
+        1 = essential data, 2 = complete support, 3 = all registers including unsupported
+      default: 1
+      type: int
+
+    # Export settings
+    enable-webserver:
+      description: |
+        Enable built-in web interface for viewing inverter data.
+      default: true
+      type: boolean
+    webserver-port:
+      description: |
+        Port for the web interface.
+      default: 8080
+      type: int
+    enable-mqtt:
+      description: |
+        Enable MQTT export.
+      default: false
+      type: boolean
+    mqtt-host:
+      description: |
+        MQTT broker hostname (required if MQTT is enabled).
+      type: string
+    mqtt-port:
+      description: |
+        MQTT broker port.
+      default: 1883
+      type: int
+    mqtt-topic:
+      description: |
+        MQTT topic prefix for published data.
+      default: "sungather"
+      type: string
+    mqtt-homeassistant:
+      description: |
+        Enable Home Assistant MQTT discovery.
+      default: false
+      type: boolean
+    enable-influxdb:
+      description: |
+        Enable InfluxDB export.
+      default: false
+      type: boolean
+    influxdb-host:
+      description: |
+        InfluxDB hostname (required if InfluxDB is enabled).
+      type: string
+    influxdb-port:
+      description: |
+        InfluxDB port.
+      default: 8086
+      type: int
+    influxdb-database:
+      description: |
+        InfluxDB database name.
+      default: "sungather"
+      type: string
+    influxdb-version:
+      description: |
+        InfluxDB version (1 or 2).
+      default: 2
+      type: int
+    pvoutput-enabled:
+      description: |
+        Enable PVOutput.org export.
+      default: false
+      type: boolean
+
+    # Logging
+    log-level:
+      description: |
+        Logging verbosity level.
+        Acceptable values are: "DEBUG", "INFO", "WARNING", "ERROR"
+      default: "INFO"
+      type: string
+
+containers:
+  sungather:
+    resource: sungather-image
+
+resources:
+  sungather-image:
+    type: oci-image
+    description: OCI image for SunGather application
+    upstream-source: bohdans/sungather:latest
+
+requires:
+  ingress:
+    interface: ingress
+    limit: 1
+    optional: true
+
+actions:
+  run-once:
+    description: Execute a single data collection cycle without waiting for the scheduled interval
+  get-inverter-info:
+    description: Retrieve detected inverter model and connection status
+  test-connection:
+    description: Test the connection to the inverter without starting data collection
