@@ -205,10 +205,15 @@ class SungatherCharm(ops.CharmBase):
         self.container.add_layer(CONTAINER_NAME, layer, combine=True)
 
         # Restart the service to pick up changes
-        if self.container.get_service(SERVICE_NAME).is_running():
-            self.container.restart(SERVICE_NAME)
-        else:
-            self.container.start(SERVICE_NAME)
+        try:
+            if self.container.get_service(SERVICE_NAME).is_running():
+                self.container.restart(SERVICE_NAME)
+            else:
+                self.container.start(SERVICE_NAME)
+        except ops.pebble.ChangeError as e:
+            logger.error("Failed to start service: %s", e)
+            self.unit.status = ops.BlockedStatus("service failed to start - check logs")
+            return
 
         # Set workload version if available
         version = sungather.get_version(self.container)

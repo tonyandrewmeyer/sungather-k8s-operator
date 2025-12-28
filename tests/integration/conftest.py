@@ -16,7 +16,7 @@ import pytest
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def juju(request: pytest.FixtureRequest):
     """Create a temporary Juju model for running tests."""
     with jubilant.temp_model() as juju:
