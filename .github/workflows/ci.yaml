@@ -75,7 +75,7 @@ jobs:
         run: charmcraft pack
 
       - name: Set up MicroK8s
-        uses: balchua/microk8s-actions@v0.3.2
+        uses: balchua/microk8s-actions@v0.4.3
         with:
           channel: '1.29/stable'
           addons: '["dns", "hostpath-storage"]'
