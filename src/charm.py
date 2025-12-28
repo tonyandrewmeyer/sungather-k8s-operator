@@ -132,12 +132,8 @@ class SungatherCharm(ops.CharmBase):
 
         # Observe action events
         framework.observe(self.on.run_once_action, self._on_run_once_action)
-        framework.observe(
-            self.on.get_inverter_info_action, self._on_get_inverter_info_action
-        )
-        framework.observe(
-            self.on.test_connection_action, self._on_test_connection_action
-        )
+        framework.observe(self.on.get_inverter_info_action, self._on_get_inverter_info_action)
+        framework.observe(self.on.test_connection_action, self._on_test_connection_action)
 
     def _on_pebble_ready(self, event: ops.PebbleReadyEvent) -> None:
         """Handle pebble-ready event."""
@@ -218,7 +214,7 @@ class SungatherCharm(ops.CharmBase):
         }
         return layer
 
-    def _generate_config_yaml(self, config: CharmConfig) -> str:
+    def _generate_config_yaml(self, config: CharmConfig) -> str:  # noqa: C901
         """Generate the SunGather config.yaml content."""
         # Build the configuration dictionary
         config_dict: dict = {
@@ -301,9 +297,7 @@ class SungatherCharm(ops.CharmBase):
 
             try:
                 pvoutput_system_id = self.model.get_secret(label="pvoutput-system-id")
-                pvoutput_config["system_id"] = pvoutput_system_id.get_content()[
-                    "value"
-                ]
+                pvoutput_config["system_id"] = pvoutput_system_id.get_content()["value"]
             except ops.SecretNotFoundError:
                 pass
 

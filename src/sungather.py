@@ -55,8 +55,7 @@ def get_inverter_info(container: ops.Container, config_path: str) -> dict[str, s
     """
     try:
         # This would require SunGather to support a --get-info flag or similar
-        # For now, we'll read the config and return what we know
-        config_content = container.pull(config_path).read()
+        # For now, return what we know
         return {
             "status": "Configuration loaded",
             "config-path": config_path,

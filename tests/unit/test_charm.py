@@ -47,7 +47,9 @@ def test_config_validation_missing_host():
     state_out = ctx.run(ctx.on.config_changed(), state_in)
 
     # Assert
-    assert state_out.unit_status == testing.BlockedStatus("Config error: inverter-host is required")
+    assert state_out.unit_status == testing.BlockedStatus(
+        "Config error: inverter-host is required"
+    )
 
 
 def test_config_validation_invalid_connection_type():
@@ -201,9 +203,7 @@ def test_generate_config_yaml_basic(valid_config):
     assert config_dict["inverter"]["smart_meter"] is False
 
     # Check webserver export
-    webserver_export = next(
-        (e for e in config_dict["exports"] if e["name"] == "webserver"), None
-    )
+    webserver_export = next((e for e in config_dict["exports"] if e["name"] == "webserver"), None)
     assert webserver_export is not None
     assert webserver_export["enabled"] is True
     assert webserver_export["port"] == 8080
@@ -270,9 +270,7 @@ def test_generate_config_yaml_with_influxdb():
     config_dict = yaml.safe_load(config_yaml)
 
     # Assert
-    influxdb_export = next(
-        (e for e in config_dict["exports"] if e["name"] == "influxdb"), None
-    )
+    influxdb_export = next((e for e in config_dict["exports"] if e["name"] == "influxdb"), None)
     assert influxdb_export is not None
     assert influxdb_export["enabled"] is True
     assert influxdb_export["host"] == "influxdb.example.com"

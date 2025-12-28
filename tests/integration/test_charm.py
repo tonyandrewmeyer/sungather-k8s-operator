@@ -8,7 +8,6 @@ import logging
 import pathlib
 
 import jubilant
-import pytest
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -18,9 +17,7 @@ METADATA = yaml.safe_load(pathlib.Path("charmcraft.yaml").read_text())
 
 def test_deploy_without_config(charm: pathlib.Path, juju: jubilant.Juju):
     """Deploy the charm without configuration should result in blocked status."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
     juju.deploy(charm.resolve(), app="sungather", resources=resources)
     # Wait for the charm to settle
     juju.wait(jubilant.all_units)
@@ -34,9 +31,7 @@ def test_deploy_without_config(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_deploy_with_config(charm: pathlib.Path, juju: jubilant.Juju):
     """Deploy the charm with valid configuration."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     # Configure with a dummy inverter host (will fail to connect, but charm should start)
     config = {
@@ -65,9 +60,7 @@ def test_deploy_with_config(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_config_changed(charm: pathlib.Path, juju: jubilant.Juju):
     """Test that configuration changes are applied."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -93,9 +86,7 @@ def test_config_changed(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_enable_mqtt_without_host(charm: pathlib.Path, juju: jubilant.Juju):
     """Test that enabling MQTT without host results in blocked status."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -119,9 +110,7 @@ def test_enable_mqtt_without_host(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_enable_mqtt_with_host(charm: pathlib.Path, juju: jubilant.Juju):
     """Test that enabling MQTT with host succeeds."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -145,9 +134,7 @@ def test_enable_mqtt_with_host(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_run_once_action(charm: pathlib.Path, juju: jubilant.Juju):
     """Test the run-once action."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -170,9 +157,7 @@ def test_run_once_action(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_get_inverter_info_action(charm: pathlib.Path, juju: jubilant.Juju):
     """Test the get-inverter-info action."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -196,9 +181,7 @@ def test_get_inverter_info_action(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_test_connection_action(charm: pathlib.Path, juju: jubilant.Juju):
     """Test the test-connection action."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -222,9 +205,7 @@ def test_test_connection_action(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_invalid_connection_type(charm: pathlib.Path, juju: jubilant.Juju):
     """Test that invalid connection type results in blocked status."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
@@ -247,9 +228,7 @@ def test_invalid_connection_type(charm: pathlib.Path, juju: jubilant.Juju):
 
 def test_invalid_level(charm: pathlib.Path, juju: jubilant.Juju):
     """Test that invalid level results in blocked status."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",
