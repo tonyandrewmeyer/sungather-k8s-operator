@@ -95,7 +95,7 @@ def test_connection(container: ops.Container, config_path: str) -> dict[str, str
         stdout, stderr = process.wait_output()
 
         # Check for common error patterns
-        if "error" in stdout.lower() or "error" in stderr.lower():
+        if "error" in stdout.lower() or (stderr and "error" in stderr.lower()):
             return {
                 "status": "failed",
                 "message": "Connection test failed - check logs for details",

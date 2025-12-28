@@ -248,11 +248,10 @@ def test_invalid_level(charm: pathlib.Path, juju: jubilant.Juju):
     assert unit_status == "blocked"
     assert "level" in status.apps["sungather"].units[0].workload_status.message.lower()
 
+
 def test_ingress_integration(charm: pathlib.Path, juju: jubilant.Juju):
     """Test ingress integration with Traefik."""
-    resources = {
-        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
-    }
+    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
 
     config = {
         "inverter-host": "192.168.1.100",

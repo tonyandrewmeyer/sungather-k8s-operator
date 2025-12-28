@@ -63,29 +63,29 @@ class CharmConfig:
         config = charm.config
         return cls(
             # Inverter settings
-            inverter_host=config.get("inverter-host"),
-            inverter_port=config["inverter-port"],
-            connection_type=config["connection-type"],
-            inverter_model=config.get("inverter-model"),
-            scan_interval=config["scan-interval"],
-            smart_meter=config["smart-meter"],
-            level=config["level"],
+            inverter_host=config.get("inverter-host"),  # type: ignore[arg-type]
+            inverter_port=config["inverter-port"],  # type: ignore[arg-type]
+            connection_type=config["connection-type"],  # type: ignore[arg-type]
+            inverter_model=config.get("inverter-model"),  # type: ignore[arg-type]
+            scan_interval=config["scan-interval"],  # type: ignore[arg-type]
+            smart_meter=config["smart-meter"],  # type: ignore[arg-type]
+            level=config["level"],  # type: ignore[arg-type]
             # Export settings
-            enable_webserver=config["enable-webserver"],
-            webserver_port=config["webserver-port"],
-            enable_mqtt=config["enable-mqtt"],
-            mqtt_host=config.get("mqtt-host"),
-            mqtt_port=config["mqtt-port"],
-            mqtt_topic=config["mqtt-topic"],
-            mqtt_homeassistant=config["mqtt-homeassistant"],
-            enable_influxdb=config["enable-influxdb"],
-            influxdb_host=config.get("influxdb-host"),
-            influxdb_port=config["influxdb-port"],
-            influxdb_database=config["influxdb-database"],
-            influxdb_version=config["influxdb-version"],
-            pvoutput_enabled=config["pvoutput-enabled"],
+            enable_webserver=config["enable-webserver"],  # type: ignore[arg-type]
+            webserver_port=config["webserver-port"],  # type: ignore[arg-type]
+            enable_mqtt=config["enable-mqtt"],  # type: ignore[arg-type]
+            mqtt_host=config.get("mqtt-host"),  # type: ignore[arg-type]
+            mqtt_port=config["mqtt-port"],  # type: ignore[arg-type]
+            mqtt_topic=config["mqtt-topic"],  # type: ignore[arg-type]
+            mqtt_homeassistant=config["mqtt-homeassistant"],  # type: ignore[arg-type]
+            enable_influxdb=config["enable-influxdb"],  # type: ignore[arg-type]
+            influxdb_host=config.get("influxdb-host"),  # type: ignore[arg-type]
+            influxdb_port=config["influxdb-port"],  # type: ignore[arg-type]
+            influxdb_database=config["influxdb-database"],  # type: ignore[arg-type]
+            influxdb_version=config["influxdb-version"],  # type: ignore[arg-type]
+            pvoutput_enabled=config["pvoutput-enabled"],  # type: ignore[arg-type]
             # Logging
-            log_level=config["log-level"],
+            log_level=config["log-level"],  # type: ignore[arg-type]
         )
 
     def validate(self) -> list[str]:
@@ -133,7 +133,7 @@ class SungatherCharm(ops.CharmBase):
         # Set up ingress integration
         self.ingress = IngressPerAppRequirer(
             self,
-            port=self.config.get("webserver-port", 8080),
+            port=self.config.get("webserver-port", 8080),  # type: ignore[arg-type]
             strip_prefix=True,
         )
 

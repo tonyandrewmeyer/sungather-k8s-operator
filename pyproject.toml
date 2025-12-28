@@ -75,3 +75,5 @@ skip = "build,lib,venv,icon.svg,.tox,.git,.mypy_cache,.ruff_cache,.coverage"
 
 [tool.pyright]
 include = ["src", "tests"]
+exclude = ["tests/integration"]  # Integration tests use Jubilant which has incomplete type stubs
+reportAttributeAccessIssue = "none"  # Disable for integration test type issues
