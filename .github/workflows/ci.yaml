@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: uv pip install --system tox
+
+      - name: Run linting
+        run: tox -e lint
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: uv pip install --system tox
+
+      - name: Run unit tests
+        run: tox -e unit
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Charmcraft
+        run: sudo snap install charmcraft --classic
+
+      - name: Install dependencies
+        run: uv pip install --system tox
+
+      - name: Pack charm
+        run: charmcraft pack
+
+      - name: Set up MicroK8s
+        uses: balchua/microk8s-actions@v0.3.2
+        with:
+          channel: '1.29/stable'
+          addons: '["dns", "hostpath-storage"]'
+
+      - name: Bootstrap Juju
+        run: |
+          sudo snap install juju --channel=3.6/stable
+          mkdir -p ~/.local/share/juju
+          juju bootstrap microk8s test-controller
+
+      - name: Run integration tests
+        run: tox -e integration
+        env:
+          CHARM_PATH: ${{ github.workspace }}/sungather_ubuntu-22.04-amd64.charm
+
+      - name: Upload charm artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: charm
+          path: '*.charm'
+
+      - name: Collect debug logs
+        if: failure()
+        run: |
+          juju debug-log --replay --no-tail > debug-log.txt
+          juju status --format=yaml > status.yaml
+
+      - name: Upload debug logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-logs
+          path: |
+            debug-log.txt
+            status.yaml
