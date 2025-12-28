@@ -61,7 +61,7 @@ def test_config_validation_invalid_connection_type():
     }
 
     container = testing.Container(CONTAINER_NAME, can_connect=True)
-    state_in = testing.State(containers={container}, config=config)
+    state_in = testing.State(containers={container}, config=config)  # type: ignore[arg-type]
 
     # Act
     state_out = ctx.run(ctx.on.config_changed(), state_in)
@@ -81,7 +81,7 @@ def test_config_validation_invalid_level():
     }
 
     container = testing.Container(CONTAINER_NAME, can_connect=True)
-    state_in = testing.State(containers={container}, config=config)
+    state_in = testing.State(containers={container}, config=config)  # type: ignore[arg-type]
 
     # Act
     state_out = ctx.run(ctx.on.config_changed(), state_in)
@@ -102,7 +102,7 @@ def test_config_validation_mqtt_without_host():
     }
 
     container = testing.Container(CONTAINER_NAME, can_connect=True)
-    state_in = testing.State(containers={container}, config=config)
+    state_in = testing.State(containers={container}, config=config)  # type: ignore[arg-type]
 
     # Act
     state_out = ctx.run(ctx.on.config_changed(), state_in)
@@ -123,7 +123,7 @@ def test_config_validation_influxdb_without_host():
     }
 
     container = testing.Container(CONTAINER_NAME, can_connect=True)
-    state_in = testing.State(containers={container}, config=config)
+    state_in = testing.State(containers={container}, config=config)  # type: ignore[arg-type]
 
     # Act
     state_out = ctx.run(ctx.on.config_changed(), state_in)
