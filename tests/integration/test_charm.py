@@ -26,7 +26,10 @@ def test_deploy_without_config(charm: pathlib.Path, juju: jubilant.Juju):
     status = juju.status()
     unit_status = status.apps["sungather"].units["sungather/0"].workload_status.current
     assert unit_status == "blocked"
-    assert "inverter-host is required" in status.apps["sungather"].units["sungather/0"].workload_status.message
+    assert (
+        "inverter-host is required"
+        in status.apps["sungather"].units["sungather/0"].workload_status.message
+    )
 
 
 def test_deploy_with_config(charm: pathlib.Path, juju: jubilant.Juju):
@@ -57,7 +60,10 @@ def test_deploy_with_config(charm: pathlib.Path, juju: jubilant.Juju):
     # The charm should reach blocked status due to workload startup failure
     unit_status = status.apps["sungather"].units["sungather/0"].workload_status.current
     assert unit_status == "blocked"
-    assert "service failed to start" in status.apps["sungather"].units["sungather/0"].workload_status.message
+    assert (
+        "service failed to start"
+        in status.apps["sungather"].units["sungather/0"].workload_status.message
+    )
 
 
 def test_config_changed(charm: pathlib.Path, juju: jubilant.Juju):
@@ -107,7 +113,10 @@ def test_enable_mqtt_without_host(charm: pathlib.Path, juju: jubilant.Juju):
     status = juju.status()
     unit_status = status.apps["sungather"].units["sungather/0"].workload_status.current
     assert unit_status == "blocked"
-    assert "mqtt-host" in status.apps["sungather"].units["sungather/0"].workload_status.message.lower()
+    assert (
+        "mqtt-host"
+        in status.apps["sungather"].units["sungather/0"].workload_status.message.lower()
+    )
 
 
 def test_enable_mqtt_with_host(charm: pathlib.Path, juju: jubilant.Juju):
@@ -231,7 +240,10 @@ def test_invalid_connection_type(charm: pathlib.Path, juju: jubilant.Juju):
     status = juju.status()
     unit_status = status.apps["sungather"].units["sungather/0"].workload_status.current
     assert unit_status == "blocked"
-    assert "connection-type" in status.apps["sungather"].units["sungather/0"].workload_status.message.lower()
+    assert (
+        "connection-type"
+        in status.apps["sungather"].units["sungather/0"].workload_status.message.lower()
+    )
 
 
 def test_invalid_level(charm: pathlib.Path, juju: jubilant.Juju):
@@ -293,4 +305,9 @@ def test_ingress_integration(charm: pathlib.Path, juju: jubilant.Juju):
     # Sungather should be blocked (workload issue)
     assert status.apps["sungather"].app_status.current == "blocked"
     # Traefik may be in various states - we just verify it deployed
-    assert status.apps["traefik"].app_status.current in ["active", "waiting", "blocked", "maintenance"]
+    assert status.apps["traefik"].app_status.current in [
+        "active",
+        "waiting",
+        "blocked",
+        "maintenance",
+    ]
