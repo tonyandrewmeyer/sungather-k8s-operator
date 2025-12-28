@@ -247,3 +247,41 @@ def test_invalid_level(charm: pathlib.Path, juju: jubilant.Juju):
     unit_status = status.apps["sungather"].units[0].workload_status.status
     assert unit_status == "blocked"
     assert "level" in status.apps["sungather"].units[0].workload_status.message.lower()
+
+def test_ingress_integration(charm: pathlib.Path, juju: jubilant.Juju):
+    """Test ingress integration with Traefik."""
+    resources = {
+        "sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]
+    }
+
+    config = {
+        "inverter-host": "192.168.1.100",
+        "enable-webserver": True,
+        "webserver-port": 8080,
+    }
+
+    # Deploy the charm
+    juju.deploy(
+        charm.resolve(),
+        app="sungather",
+        resources=resources,
+        config=config,
+    )
+    juju.wait(jubilant.all_units)
+
+    # Deploy Traefik
+    juju.deploy("traefik-k8s", app="traefik", channel="latest/stable", trust=True)
+    juju.wait(jubilant.all_units)
+
+    # Integrate sungather with traefik
+    juju.integrate("sungather:ingress", "traefik:ingress")
+    juju.wait(jubilant.all_units)
+
+    # Verify the integration exists
+    status = juju.status()
+    assert "sungather" in status.apps
+    assert "traefik" in status.apps
+
+    # Both apps should be active
+    assert status.apps["sungather"].status.status in ["active", "waiting"]
+    assert status.apps["traefik"].status.status in ["active", "waiting"]

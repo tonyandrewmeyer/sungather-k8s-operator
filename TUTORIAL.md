@@ -58,22 +58,27 @@ This will attempt to connect to the inverter and collect a single data point.
 
 ## Step 4: Access the web interface
 
-By default, SunGather runs a web interface on port 8080. To access it, you'll need to integrate with an ingress controller.
+By default, SunGather runs a web interface on port 8080. To access it externally, you'll need to integrate with Traefik.
 
-If you don't have an ingress controller deployed yet:
+Deploy Traefik if you haven't already:
 
 ```bash
-juju deploy nginx-ingress-integrator \
-  --config service-hostname=sungather.local
+juju deploy traefik-k8s --channel latest/stable --trust
+```
+
+Wait for Traefik to be active:
+
+```bash
+juju status --watch 5s
 ```
 
 Then integrate the charm:
 
 ```bash
-juju integrate sungather nginx-ingress-integrator
+juju integrate sungather:ingress traefik:ingress
 ```
 
-You can now access the web interface at `http://sungather.local:8080` (or whatever hostname you configured).
+Traefik will automatically configure routing for the SunGather web interface. You can access it via the Traefik ingress URL.
 
 ## Step 5: Configure MQTT export (optional)
 

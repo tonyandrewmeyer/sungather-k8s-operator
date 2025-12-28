@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 # dependencies of any charmlibs that the charm uses (copy the dependencies from PYDEPS).
 dependencies = [
     "ops>=3,<4",
+    "pydantic",  # Required by traefik_k8s.v2.ingress library
 ]
 
 [dependency-groups]

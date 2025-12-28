@@ -163,6 +163,11 @@ requires:
     limit: 1
     optional: true
 
+# Charm libraries to fetch
+charm-libs:
+  - lib: traefik_k8s.ingress
+    version: "2"
+
 actions:
   run-once:
     description: Execute a single data collection cycle without waiting for the scheduled interval

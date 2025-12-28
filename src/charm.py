@@ -11,6 +11,11 @@ from dataclasses import dataclass
 
 import ops
 import yaml
+from charms.traefik_k8s.v2.ingress import (
+    IngressPerAppReadyEvent,
+    IngressPerAppRequirer,
+    IngressPerAppRevokedEvent,
+)
 
 import sungather
 
@@ -125,10 +130,21 @@ class SungatherCharm(ops.CharmBase):
         super().__init__(framework)
         self.container = self.unit.get_container(CONTAINER_NAME)
 
+        # Set up ingress integration
+        self.ingress = IngressPerAppRequirer(
+            self,
+            port=self.config.get("webserver-port", 8080),
+            strip_prefix=True,
+        )
+
         # Observe events
         framework.observe(self.on[CONTAINER_NAME].pebble_ready, self._on_pebble_ready)
         framework.observe(self.on.config_changed, self._on_config_changed)
         framework.observe(self.on.update_status, self._on_update_status)
+
+        # Observe ingress events
+        framework.observe(self.ingress.on.ready, self._on_ingress_ready)
+        framework.observe(self.ingress.on.revoked, self._on_ingress_revoked)
 
         # Observe action events
         framework.observe(self.on.run_once_action, self._on_run_once_action)
@@ -153,6 +169,14 @@ class SungatherCharm(ops.CharmBase):
             self.unit.status = ops.ActiveStatus()
         else:
             self.unit.status = ops.BlockedStatus("service is not running")
+
+    def _on_ingress_ready(self, event: IngressPerAppReadyEvent) -> None:
+        """Handle ingress-ready event."""
+        logger.info("Ingress URL is ready: %s", event.url)
+
+    def _on_ingress_revoked(self, event: IngressPerAppRevokedEvent) -> None:
+        """Handle ingress-revoked event."""
+        logger.info("Ingress has been revoked")
 
     def _reconcile(self, event: ops.EventBase) -> None:
         """Reconcile the charm state."""

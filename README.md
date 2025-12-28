@@ -85,9 +85,9 @@ juju grant-secret pvoutput-system-id sungather
 
 ```bash
 # The webserver is enabled by default on port 8080
-# To make it accessible externally, integrate with an ingress controller
-juju deploy nginx-ingress-integrator
-juju integrate sungather nginx-ingress-integrator
+# To make it accessible externally, integrate with Traefik
+juju deploy traefik-k8s --channel latest/stable --trust
+juju integrate sungather:ingress traefik:ingress
 ```
 
 ### Actions
@@ -140,11 +140,17 @@ juju run sungather/0 test-connection
 
 ### Ingress
 
-The charm can integrate with ingress controllers to expose the web interface:
+The charm integrates with Traefik to expose the web interface externally:
 
 ```bash
-juju integrate sungather nginx-ingress-integrator
+# Deploy Traefik if not already deployed
+juju deploy traefik-k8s --channel latest/stable --trust
+
+# Integrate with SunGather
+juju integrate sungather:ingress traefik:ingress
 ```
+
+Once integrated, Traefik will automatically configure routing to the SunGather web interface.
 
 ## Development
 

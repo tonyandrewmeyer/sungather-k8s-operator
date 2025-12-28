@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial charm implementation for SunGather
+- Traefik ingress integration for external access to web interface
 - Configuration options for inverter connection (host, port, connection type, scan interval)
 - Support for multiple export destinations:
   - Built-in webserver (enabled by default on port 8080)
