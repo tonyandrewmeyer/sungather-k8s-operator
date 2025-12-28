@@ -9,6 +9,65 @@ This tutorial will guide you through deploying and configuring the SunGather cha
 - A Sungrow solar inverter accessible over the network
 - The inverter's IP address and port (typically 502 for ModBus TCP)
 
+## Finding your inverter's IP address
+
+If you don't know your inverter's IP address, here are several methods to find it:
+
+### Method 1: Check your router's DHCP client list
+
+This is usually the easiest method:
+
+1. Log in to your router's admin interface (typically at `192.168.1.1` or `192.168.0.1`)
+2. Look for "Connected Devices", "DHCP Clients", or "Device List"
+3. Find a device named something like "Sungrow", "inverter", or with a MAC address starting with `7C:F9:5C` (common for Sungrow devices)
+4. Note the IP address assigned to this device
+
+### Method 2: Use a network scanning app on your phone
+
+Download a network scanner app such as:
+- **Fing** (iOS/Android) - Very user-friendly
+- **Network Analyzer** (iOS)
+- **Net Scan** (Android)
+
+These apps will show all devices on your network with their IP addresses and often identify the manufacturer.
+
+### Method 3: Check the inverter's display
+
+Some Sungrow inverters display their network information:
+
+1. Navigate through the inverter's menu using the buttons on the device
+2. Look for "Network Settings", "WiFi Info", or "Communication Settings"
+3. The IP address should be displayed there
+
+### Method 4: Use nmap from the command line
+
+If you're comfortable with the terminal:
+
+```bash
+# Scan your local network (adjust the network range as needed)
+nmap -sn 192.168.1.0/24
+
+# Or use arp-scan (may need to install it first)
+sudo arp-scan --localnet
+```
+
+Look for devices with MAC addresses from Sungrow or unknown manufacturers.
+
+### Method 5: Use the Sungrow mobile app
+
+If you use the official Sungrow app (iSolarCloud):
+
+1. Open the app and ensure you're connected to the same WiFi network as the inverter
+2. Go to the inverter settings or information page
+3. The IP address is often shown in the network or communication settings
+
+### Tips
+
+- **Static IP recommended**: Once you find the IP address, consider setting a static IP reservation in your router's DHCP settings for the inverter. This ensures the IP address doesn't change.
+- **Same network**: The inverter must be on the same network as your Kubernetes cluster, or the network must be routable between them.
+- **Default subnet**: Most home networks use `192.168.1.x` or `192.168.0.x` ranges.
+- **Port**: The default port for ModBus TCP is `502`. Some inverters also support HTTP on port `8082`.
+
 ## Step 1: Deploy the charm
 
 First, deploy the SunGather charm:
