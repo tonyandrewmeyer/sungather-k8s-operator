@@ -65,26 +65,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Charmcraft
-        run: sudo snap install charmcraft --classic
+      - name: Install Concierge
+        run: sudo snap install concierge
+
+      - name: Set up development environment
+        run: sudo concierge prepare -p dev
 
       - name: Install tox
         run: uv tool install --with=tox-uv tox
 
       - name: Pack charm
         run: charmcraft pack
-
-      - name: Set up MicroK8s
-        uses: balchua/microk8s-actions@v0.3.2
-        with:
-          channel: '1.29/stable'
-          addons: '["dns", "hostpath-storage"]'
-
-      - name: Bootstrap Juju
-        run: |
-          sudo snap install juju --channel=3.6/stable
-          mkdir -p ~/.local/share/juju
-          juju bootstrap microk8s test-controller
 
       - name: Run integration tests
         run: uv run tox -e integration
