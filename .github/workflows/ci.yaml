@@ -23,11 +23,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: uv pip install --system tox
+      - name: Install tox
+        run: uv tool install --with=tox-uv tox
 
       - name: Run linting
-        run: tox -e lint
+        run: uv run tox -e lint
 
   unit-tests:
     name: Unit Tests
@@ -44,11 +44,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: uv pip install --system tox
+      - name: Install tox
+        run: uv tool install --with=tox-uv tox
 
       - name: Run unit tests
-        run: tox -e unit
+        run: uv run tox -e unit
 
   integration-tests:
     name: Integration Tests
@@ -68,8 +68,8 @@ jobs:
       - name: Install Charmcraft
         run: sudo snap install charmcraft --classic
 
-      - name: Install dependencies
-        run: uv pip install --system tox
+      - name: Install tox
+        run: uv tool install --with=tox-uv tox
 
       - name: Pack charm
         run: charmcraft pack
@@ -87,7 +87,7 @@ jobs:
           juju bootstrap microk8s test-controller
 
       - name: Run integration tests
-        run: tox -e integration
+        run: uv run tox -e integration
         env:
           CHARM_PATH: ${{ github.workspace }}/sungather_ubuntu-22.04-amd64.charm
 
