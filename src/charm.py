@@ -94,30 +94,46 @@ class CharmConfig:
 
         # Inverter host is required
         if not self.inverter_host:
-            errors.append("inverter-host is required")
+            errors.append(
+                "missing inverter-host: set with "
+                "'juju config sungather inverter-host=<ip-address>'"
+            )
 
         # Connection type validation
         if self.connection_type not in ["modbus", "sungrow", "http"]:
             errors.append(
-                f"connection-type must be modbus, sungrow, or http, got {self.connection_type}"
+                f"invalid connection-type '{self.connection_type}': use "
+                "'juju config sungather connection-type=modbus' (or sungrow/http)"
             )
 
         # Level validation
         if self.level not in [1, 2, 3]:
-            errors.append(f"level must be 1, 2, or 3, got {self.level}")
+            errors.append(
+                f"invalid level {self.level}: use 'juju config sungather level=1' "
+                "(1=essential, 2=complete, 3=all)"
+            )
 
         # MQTT validation
         if self.enable_mqtt and not self.mqtt_host:
-            errors.append("mqtt-host is required when enable-mqtt is true")
+            errors.append(
+                "mqtt-host required when MQTT enabled: set with "
+                "'juju config sungather mqtt-host=<hostname>' or disable with "
+                "'juju config sungather enable-mqtt=false'"
+            )
 
         # InfluxDB validation
         if self.enable_influxdb and not self.influxdb_host:
-            errors.append("influxdb-host is required when enable-influxdb is true")
+            errors.append(
+                "influxdb-host required when InfluxDB enabled: set with "
+                "'juju config sungather influxdb-host=<hostname>' or disable with "
+                "'juju config sungather enable-influxdb=false'"
+            )
 
         # Log level validation
         if self.log_level not in ["DEBUG", "INFO", "WARNING", "ERROR"]:
             errors.append(
-                f"log-level must be DEBUG, INFO, WARNING, or ERROR, got {self.log_level}"
+                f"invalid log-level '{self.log_level}': use "
+                "'juju config sungather log-level=INFO' (DEBUG/INFO/WARNING/ERROR)"
             )
 
         return errors
@@ -168,7 +184,10 @@ class SungatherCharm(ops.CharmBase):
         if self._is_service_running():
             self.unit.status = ops.ActiveStatus()
         else:
-            self.unit.status = ops.BlockedStatus("service is not running")
+            self.unit.status = ops.BlockedStatus(
+                "service not running: check 'juju debug-log' for errors, "
+                "verify inverter is reachable"
+            )
 
     def _on_ingress_ready(self, event: IngressPerAppReadyEvent) -> None:
         """Handle ingress-ready event."""
@@ -212,7 +231,10 @@ class SungatherCharm(ops.CharmBase):
                 self.container.start(SERVICE_NAME)
         except ops.pebble.ChangeError as e:
             logger.error("Failed to start service: %s", e)
-            self.unit.status = ops.BlockedStatus("service failed to start - check logs")
+            self.unit.status = ops.BlockedStatus(
+                "service failed to start: check 'juju debug-log --include=sungather' "
+                "for details, verify OCI image is correct"
+            )
             return
 
         # Set workload version if available

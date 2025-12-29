@@ -46,9 +46,8 @@ def test_config_validation_missing_host():
     state_out = ctx.run(ctx.on.config_changed(), state_in)
 
     # Assert
-    assert state_out.unit_status == testing.BlockedStatus(
-        "Config error: inverter-host is required"
-    )
+    assert state_out.unit_status.name == "blocked"
+    assert "inverter-host" in state_out.unit_status.message
 
 
 def test_config_validation_invalid_connection_type():

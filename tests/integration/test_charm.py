@@ -27,8 +27,8 @@ def test_deploy_without_config(charm: pathlib.Path, juju: jubilant.Juju):
     unit_status = status.apps["sungather"].units["sungather/0"].workload_status.current
     assert unit_status == "blocked"
     assert (
-        "inverter-host is required"
-        in status.apps["sungather"].units["sungather/0"].workload_status.message
+        "inverter-host"
+        in status.apps["sungather"].units["sungather/0"].workload_status.message.lower()
     )
 
 
