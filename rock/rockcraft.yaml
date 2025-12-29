@@ -1,0 +1,56 @@
+name: sungather
+summary: Data collection tool for Sungrow solar inverters
+description: |
+  SunGather collects operational data from Sungrow inverters via ModBus
+  connections and exports to MQTT, InfluxDB, PVOutput.org, and more.
+version: "0.3.8"
+base: ubuntu@22.04
+build-base: ubuntu@22.04
+platforms:
+  amd64:
+
+services:
+  sungather:
+    override: replace
+    startup: enabled
+    command: /bin/bash -c "python3 /opt/sungather/sungather.py -c ${SUNGATHER_CONFIG:-/config/config.yaml}"
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+parts:
+  sungather:
+    plugin: nil
+    build-packages:
+      - git
+      - python3
+      - python3-pip
+      - python3-venv
+    stage-packages:
+      - python3
+      - python3-pkg-resources
+    override-build: |
+      # Clone SunGather repository
+      git clone https://github.com/bohdan-s/SunGather.git /tmp/sungather-src
+      cd /tmp/sungather-src
+
+      # Install Python dependencies into a virtual environment
+      python3 -m venv ${CRAFT_PART_INSTALL}/opt/venv
+      ${CRAFT_PART_INSTALL}/opt/venv/bin/pip install --upgrade pip
+      ${CRAFT_PART_INSTALL}/opt/venv/bin/pip install -r requirements.txt
+
+      # Copy SunGather application files
+      mkdir -p ${CRAFT_PART_INSTALL}/opt/sungather
+      cp -r SunGather ${CRAFT_PART_INSTALL}/opt/sungather/
+      cp sungather.py ${CRAFT_PART_INSTALL}/opt/sungather/
+      cp config-example.yaml ${CRAFT_PART_INSTALL}/opt/sungather/
+
+      # Create a wrapper script that uses the virtual environment
+      cat > ${CRAFT_PART_INSTALL}/opt/sungather/run.sh << 'EOF'
+#!/bin/bash
+source /opt/venv/bin/activate
+exec python3 /opt/sungather/sungather.py "$@"
+EOF
+      chmod +x ${CRAFT_PART_INSTALL}/opt/sungather/run.sh
+
+      # Update the Python shebang to use the venv
+      sed -i '1s|^#!/usr/bin/env python3|#!/opt/venv/bin/python3|' ${CRAFT_PART_INSTALL}/opt/sungather/sungather.py

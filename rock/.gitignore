@@ -1,0 +1,5 @@
+# Rockcraft build artifacts
+*.rock
+parts/
+prime/
+stage/

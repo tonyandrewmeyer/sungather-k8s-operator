@@ -29,11 +29,21 @@ The charm will show `blocked` status with the message:
 service failed to start: check 'juju debug-log --include=sungather' for details, verify OCI image is correct
 ```
 
-**To use this charm, you must:**
-1. Build your own OCI image with all SunGather dependencies, or
-2. Find/create a working SunGather OCI image
+**Solution: Build the Working Rock Image**
 
-The integration tests verify that the charm handles broken workload images gracefully - this is working as designed. However, a production-ready OCI image is needed for actual use.
+This repository includes a working rock definition in the `rock/` directory. To build it:
+
+```bash
+cd rock
+rockcraft pack
+sudo rockcraft.skopeo --insecure-policy copy \
+  oci-archive:sungather_0.3.8_amd64.rock \
+  docker-daemon:sungather:0.3.8
+```
+
+See [rock/README.md](rock/README.md) for detailed instructions.
+
+The integration tests verify that the charm handles broken workload images gracefully - this is working as designed. The rock provides a production-ready OCI image.
 
 ## Usage
 
