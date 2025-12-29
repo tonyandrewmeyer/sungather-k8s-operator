@@ -83,7 +83,7 @@ jobs:
       - name: Run integration tests
         run: uv run tox -e integration
         env:
-          CHARM_PATH: ${{ github.workspace }}/sungather_ubuntu-22.04-amd64.charm
+          CHARM_PATH: ${{ github.workspace }}/sungather_amd64.charm
 
       - name: Upload charm artifact
         if: always()
