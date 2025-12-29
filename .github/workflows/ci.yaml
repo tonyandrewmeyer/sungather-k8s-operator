@@ -66,7 +66,10 @@ jobs:
           python-version: '3.10'
 
       - name: Install Concierge
-        run: sudo snap install concierge --classic
+        run: |
+          sudo apt-get remove -y docker-ce docker-ce-cli containerd.io
+          sudo rm -rf /run/containerd
+          sudo snap install concierge --classic
 
       - name: Set up development environment
         run: sudo concierge prepare -p dev
