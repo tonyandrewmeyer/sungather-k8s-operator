@@ -15,6 +15,26 @@ SunGather collects operational data from Sungrow inverters via ModBus connection
 - **Secure credential management**: Uses Juju secrets for sensitive credentials
 - **Actions**: Run data collection on-demand, test connections, and retrieve inverter information
 
+## Important: OCI Image Issue
+
+**The default OCI image (`bohdans/sungather:latest`) has missing Python dependencies and will not work.**
+
+The charm will deploy successfully but the service will fail to start with:
+```
+ModuleNotFoundError: No module named 'SungrowClient'
+```
+
+The charm will show `blocked` status with the message:
+```
+service failed to start: check 'juju debug-log --include=sungather' for details, verify OCI image is correct
+```
+
+**To use this charm, you must:**
+1. Build your own OCI image with all SunGather dependencies, or
+2. Find/create a working SunGather OCI image
+
+The integration tests verify that the charm handles broken workload images gracefully - this is working as designed. However, a production-ready OCI image is needed for actual use.
+
 ## Usage
 
 ### Basic deployment

@@ -3,6 +3,17 @@
 #
 # The integration tests use the Jubilant library. See https://documentation.ubuntu.com/jubilant/
 # To learn more about testing, see https://documentation.ubuntu.com/ops/latest/explanation/testing/
+#
+# IMPORTANT: These tests verify that the CHARM behaves correctly, not the workload.
+# The default OCI image (bohdans/sungather:latest) has missing Python dependencies
+# and will fail to start. These tests verify that:
+# 1. The charm handles workload failures gracefully (goes to blocked status)
+# 2. The charm provides helpful error messages to users
+# 3. The charm configuration validation works correctly
+# 4. The charm actions work (even when the workload fails)
+#
+# This is intentional - the tests validate charm robustness with a broken workload.
+# For production use, a working OCI image with all dependencies is required.
 
 import logging
 import pathlib
