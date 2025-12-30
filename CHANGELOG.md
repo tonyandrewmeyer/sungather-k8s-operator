@@ -27,10 +27,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable logging levels (DEBUG, INFO, WARNING, ERROR)
 - Comprehensive integration tests using Jubilant
 - Comprehensive unit tests using ops.testing
+- Working rock definition in `rock/` directory for building production-ready OCI images
+  - Uses `uv` for fast dependency management (dependencies install in ~23ms)
+  - Includes all 20 required Python packages (paho-mqtt, pymodbus, sungrowclient, influxdb-client, etc.)
+  - Resolves ModuleNotFoundError present in default `bohdans/sungather:latest` image
+  - Comprehensive build and deployment documentation in `rock/README.md`
 - Documentation:
   - README with usage examples
   - TUTORIAL for step-by-step deployment guide
   - CONTRIBUTING for development guidelines
   - SECURITY for vulnerability reporting
+  - Rock build instructions and troubleshooting guide
+
+### Changed
+- CI workflow now uses `uv` for faster test execution
+- CI workflow uses Concierge for simplified Juju/K8s environment setup
+- Integration tests clarified to verify charm robustness with broken workload images
+- Error messages now include specific `juju config` commands for resolution
+
+### Fixed
+- Charm filename reference in CI workflow (corrected to `sungather_amd64.charm`)
+- Concierge installation in CI now uses `--classic` flag
 
 [Unreleased]: https://github.com/canonical/sungather-operator/compare/HEAD...HEAD
