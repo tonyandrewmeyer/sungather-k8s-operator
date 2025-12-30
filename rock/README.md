@@ -53,14 +53,20 @@ sudo rockcraft.skopeo --insecure-policy copy \
 
 For Canonical K8s (k8s snap):
 ```bash
-# Convert to OCI tar format first
-sudo rockcraft.skopeo --insecure-policy copy \
-  oci-archive:sungather_0.3.8_amd64.rock \
-  oci-archive:/tmp/sungather.tar
+# Import directly into k8s containerd (similar to MicroK8s approach)
+cat sungather_0.3.8_amd64.rock | \
+  sudo /snap/k8s/current/bin/ctr --namespace k8s.io images import \
+  --base-name sungather:0.3.8 /dev/stdin
 
-# Then use your container runtime to import
-# Note: May require additional setup or a local registry
+# Tag the image properly
+sudo /snap/k8s/current/bin/ctr --namespace k8s.io images tag \
+  sungather:0.3.8:0.3.8 sungather:0.3.8
+
+# Verify the image
+sudo /snap/k8s/current/bin/ctr --namespace k8s.io images ls | grep sungather
 ```
+
+**Note**: Due to Kubernetes image pull policies, using locally-imported images with Juju may still attempt to pull from remote registries. **The recommended approach is to push the rock to a proper container registry** (GitHub Container Registry, Docker Hub, private registry, etc.) and deploy from there.
 
 ## Using with the Charm
 
