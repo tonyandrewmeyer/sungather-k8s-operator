@@ -1,7 +1,7 @@
 # This file configures Charmcraft.
 # See https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/
 type: charm
-name: sungather
+name: sungather-k8s
 title: SunGather
 summary: Collect and export data from Sungrow solar inverters via ModBus.
 description: |
