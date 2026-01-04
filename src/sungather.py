@@ -87,13 +87,14 @@ def test_connection(container: ops.Container, config_path: str) -> dict[str, str
         process = container.exec(
             [
                 "/usr/bin/python3.10",
-                "/opt/sungather/SunGather/sungather.py",
+                "sungather.py",
                 "-c",
                 config_path,
                 "--runonce",
             ],
             timeout=30.0,
             encoding="utf-8",
+            working_dir="/opt/sungather/SunGather",
             environment={"PYTHONPATH": "/opt/sungather-lib"},
         )
         stdout, stderr = process.wait_output()

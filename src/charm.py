@@ -393,13 +393,14 @@ class SungatherCharm(ops.CharmBase):
             process = self.container.exec(
                 [
                     "/usr/bin/python3.10",
-                    "/opt/sungather/SunGather/sungather.py",
+                    "sungather.py",
                     "-c",
                     CONFIG_PATH,
                     "--runonce",
                 ],
                 timeout=60.0,
                 encoding="utf-8",
+                working_dir="/opt/sungather/SunGather",
                 environment={"PYTHONPATH": "/opt/sungather-lib"},
             )
             stdout, stderr = process.wait_output()
