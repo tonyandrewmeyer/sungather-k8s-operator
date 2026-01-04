@@ -192,10 +192,14 @@ def test_pebble_layer_generation():
     assert "sungather" in layer["services"]  # type: ignore[typeddict-item]
     service = layer["services"]["sungather"]  # type: ignore[typeddict-item]
     assert service["startup"] == "enabled"  # type: ignore[typeddict-item]
-    assert "/opt/sungather/sungather.py" in service["command"]  # type: ignore[typeddict-item]
+    assert "/usr/bin/python3.10" in service["command"]  # type: ignore[typeddict-item]
+    assert "sungather.py" in service["command"]  # type: ignore[typeddict-item]
     assert "-c /config/config.yaml" in service["command"]  # type: ignore[typeddict-item]
+    assert service["working-dir"] == "/opt/sungather/SunGather"  # type: ignore[typeddict-item]
     assert "TZ" in service["environment"]  # type: ignore[typeddict-item]
     assert "LOG_LEVEL" in service["environment"]  # type: ignore[typeddict-item]
+    assert "PYTHONPATH" in service["environment"]  # type: ignore[typeddict-item]
+    assert service["environment"]["PYTHONPATH"] == "/opt/sungather-lib"  # type: ignore[typeddict-item]
 
 
 def test_environment_generation():
