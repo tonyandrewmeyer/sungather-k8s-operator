@@ -13,9 +13,11 @@ services:
   sungather:
     override: replace
     startup: enabled
-    command: /opt/venv/bin/python3.10 /opt/sungather/SunGather/sungather.py -c /config/config.yaml
+    command: /usr/bin/python3.10 sungather.py -c /config/config.yaml
+    working-dir: /opt/sungather/SunGather
     environment:
       PYTHONUNBUFFERED: "1"
+      PYTHONPATH: "/opt/sungather-lib"
 
 parts:
   sungather:
@@ -33,11 +35,9 @@ parts:
       git clone https://github.com/bohdan-s/SunGather.git /tmp/sungather-src
       cd /tmp/sungather-src
 
-      # Create virtual environment with uv
-      uv venv ${CRAFT_PART_INSTALL}/opt/venv --python python3.10
-
-      # Install Python dependencies with uv
-      uv pip install -r requirements.txt --python ${CRAFT_PART_INSTALL}/opt/venv/bin/python
+      # Install Python dependencies to a custom location using uv
+      mkdir -p ${CRAFT_PART_INSTALL}/opt/sungather-lib
+      uv pip install -r requirements.txt --target ${CRAFT_PART_INSTALL}/opt/sungather-lib --python /usr/bin/python3.10
 
       # Copy SunGather application files
       mkdir -p ${CRAFT_PART_INSTALL}/opt/sungather
@@ -45,5 +45,5 @@ parts:
 
       # Update the Python shebang if sungather.py exists
       if [ -f "${CRAFT_PART_INSTALL}/opt/sungather/SunGather/sungather.py" ]; then
-        sed -i '1s|^#!/usr/bin/env python3|#!/opt/venv/bin/python3.10|' ${CRAFT_PART_INSTALL}/opt/sungather/SunGather/sungather.py
+        sed -i '1s|^#!/usr/bin/env python3|#!/usr/bin/python3.10|' ${CRAFT_PART_INSTALL}/opt/sungather/SunGather/sungather.py
       fi

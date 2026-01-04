@@ -248,7 +248,9 @@ class SungatherCharm(ops.CharmBase):
         self, config: CharmConfig, environment: dict[str, str]
     ) -> ops.pebble.LayerDict:
         """Build the Pebble layer for SunGather."""
-        command = f"python3 /opt/sungather/sungather.py -c {CONFIG_PATH}"
+        command = f"/usr/bin/python3.10 sungather.py -c {CONFIG_PATH}"
+        # Add PYTHONPATH to environment for rock-installed dependencies
+        environment["PYTHONPATH"] = "/opt/sungather-lib"
 
         layer: ops.pebble.LayerDict = {
             "summary": "sungather layer",
@@ -259,6 +261,7 @@ class SungatherCharm(ops.CharmBase):
                     "summary": "SunGather data collection service",
                     "command": command,
                     "startup": "enabled",
+                    "working-dir": "/opt/sungather/SunGather",
                     "environment": environment,
                 }
             },
@@ -389,14 +392,15 @@ class SungatherCharm(ops.CharmBase):
             # Run sungather with --runonce flag
             process = self.container.exec(
                 [
-                    "python3",
-                    "/opt/sungather/sungather.py",
+                    "/usr/bin/python3.10",
+                    "/opt/sungather/SunGather/sungather.py",
                     "-c",
                     CONFIG_PATH,
                     "--runonce",
                 ],
                 timeout=60.0,
                 encoding="utf-8",
+                environment={"PYTHONPATH": "/opt/sungather-lib"},
             )
             stdout, stderr = process.wait_output()
             event.set_results({"output": stdout, "error": stderr if stderr else ""})

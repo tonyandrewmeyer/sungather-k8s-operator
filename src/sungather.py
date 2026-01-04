@@ -11,8 +11,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+import ops
+
 if TYPE_CHECKING:
-    import ops
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +31,10 @@ def get_version(container: ops.Container) -> str | None:
     try:
         # Try to get version from the sungather package
         process = container.exec(
-            ["python3", "-c", "import sungather; print(sungather.__version__)"],
+            ["/usr/bin/python3.10", "-c", "import sungather; print(sungather.__version__)"],
             timeout=5.0,
             encoding="utf-8",
+            environment={"PYTHONPATH": "/opt/sungather-lib"},
         )
         stdout, _ = process.wait_output()
         return stdout.strip()
@@ -83,14 +86,15 @@ def test_connection(container: ops.Container, config_path: str) -> dict[str, str
         # Run sungather with --runonce to test the connection
         process = container.exec(
             [
-                "python3",
-                "/opt/sungather/sungather.py",
+                "/usr/bin/python3.10",
+                "/opt/sungather/SunGather/sungather.py",
                 "-c",
                 config_path,
                 "--runonce",
             ],
             timeout=30.0,
             encoding="utf-8",
+            environment={"PYTHONPATH": "/opt/sungather-lib"},
         )
         stdout, stderr = process.wait_output()
 
