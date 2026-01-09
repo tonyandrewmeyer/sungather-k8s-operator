@@ -81,7 +81,7 @@ jobs:
       - name: Build rock
         run: |
           cd rock
-          rockcraft pack --verbose
+          rockcraft pack --destructive-mode --verbose
 
       - name: Extract rock to OCI archive
         id: extract

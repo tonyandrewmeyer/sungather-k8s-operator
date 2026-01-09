@@ -58,5 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Charm filename reference in CI workflow (corrected to `sungather_amd64.charm`)
 - Concierge installation in CI now uses `--classic` flag
+- Rock build in CI now uses `--destructive-mode` to avoid LXD permission issues
 
 [Unreleased]: https://github.com/canonical/sungather-operator/compare/HEAD...HEAD
