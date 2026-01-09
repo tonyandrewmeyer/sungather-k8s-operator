@@ -81,7 +81,7 @@ jobs:
       - name: Build rock
         run: |
           cd rock
-          rockcraft pack --destructive-mode --verbose
+          sudo rockcraft pack --destructive-mode --verbose
 
       - name: Extract rock to OCI archive
         id: extract
@@ -89,6 +89,7 @@ jobs:
           cd rock
           ROCK_FILE=$(ls *.rock)
           sudo rockcraft.skopeo --insecure-policy copy oci-archive:${ROCK_FILE} docker-archive:sungather.tar
+          sudo chown $USER:$USER sungather.tar
           echo "archive=rock/sungather.tar" >> $GITHUB_OUTPUT
 
       - name: Generate image metadata
