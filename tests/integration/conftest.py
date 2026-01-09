@@ -12,6 +12,7 @@ import time
 
 import jubilant
 import pytest
+from mock_sungrow.server import MockSungrowServer
 
 logger = logging.getLogger(__name__)
 
@@ -45,3 +46,34 @@ def charm():
         path_list = ", ".join(str(path) for path in charm_paths)
         raise ValueError(f"More than one .charm file in current directory: {path_list}")
     return charm_paths[0]
+
+
+@pytest.fixture(scope="module")
+def mock_sungrow():
+    """Start a mock Sungrow inverter server for testing.
+
+    This fixture starts both Modbus TCP and HTTP servers that simulate a Sungrow
+    inverter. Tests can use this to verify charm behaviour with a working workload.
+
+    The servers run on non-privileged ports:
+    - Modbus TCP: 5020 (instead of standard 502)
+    - HTTP: 8082 (standard WiNet-S port)
+
+    Returns:
+        MockSungrowServer instance with connection info methods.
+    """
+    logger.info("Starting mock Sungrow inverter server")
+    # Bind to 0.0.0.0 so it's accessible from Kubernetes pods
+    server = MockSungrowServer(
+        host="0.0.0.0",
+        modbus_port=5020,
+        http_port=8082,
+        model="SG5K-D",
+        server_type="both",
+    )
+    server.start()
+
+    yield server
+
+    logger.info("Stopping mock Sungrow inverter server")
+    server.stop()

@@ -89,6 +89,16 @@ Or with pytest directly:
 pytest tests/integration/
 ```
 
+#### Mock Sungrow Server
+
+The integration tests include a mock Sungrow inverter server that simulates both Modbus TCP and HTTP/WebSocket protocols. This allows testing the charm with a working workload without requiring actual hardware.
+
+The mock server is automatically started by the `mock_sungrow` pytest fixture. Tests in `test_charm_with_mock.py` use this fixture to verify that the charm works correctly when the workload can actually connect to an inverter.
+
+The original tests in `test_charm.py` verify that the charm handles broken workloads gracefully (using the default OCI image with missing dependencies).
+
+See [tests/integration/mock_sungrow/README.md](tests/integration/mock_sungrow/README.md) for more details about the mock server implementation.
+
 ## Building the Charm
 
 Build the charm using charmcraft:

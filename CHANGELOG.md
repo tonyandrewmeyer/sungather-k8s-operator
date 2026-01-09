@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable logging levels (DEBUG, INFO, WARNING, ERROR)
 - Comprehensive integration tests using Jubilant
 - Comprehensive unit tests using ops.testing
+- Mock Sungrow inverter server for integration testing
+  - Implements Modbus TCP protocol with realistic register data using pymodbus 3.x
+  - Implements HTTP/WebSocket protocol (WiNet-S simulation)
+  - Supports both `modbus` and `http` connection types
+  - Enables testing charm with working workload without hardware
+  - Tests currently skipped (require working OCI image from rock/ directory)
+  - See `tests/integration/mock_sungrow/README.md` and `TESTING.md` for details
 - Working rock definition in `rock/` directory for building production-ready OCI images
   - Uses `uv` for fast dependency management (dependencies install in ~23ms)
   - Includes all 20 required Python packages (paho-mqtt, pymodbus, sungrowclient, influxdb-client, etc.)
