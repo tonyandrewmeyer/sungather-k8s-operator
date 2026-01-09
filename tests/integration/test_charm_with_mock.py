@@ -7,16 +7,14 @@
 # IMPORTANT: These tests require a working OCI image with all dependencies.
 # The default image (bohdans/sungather:latest) is broken and will not work.
 #
-# To run these tests successfully:
-# 1. Build the working rock: cd rock && rockcraft pack
-# 2. Load it into the registry:
-#    rockcraft.skopeo copy oci-archive:sungather_0.3.8_amd64.rock \
-#      docker-daemon:sungather:0.3.8
-# 3. Push to a registry accessible from your K8s cluster
-# 4. Update the METADATA below to use your working image
+# To run these tests successfully, you need to:
+# 1. Build the rock: cd rock && rockcraft pack
+# 2. Push to a public registry (e.g., ghcr.io/yourorg/sungather:0.3.8)
+# 3. Update WORKING_IMAGE below with your registry URL
+# 4. Remove the pytestmark skip decorator
 #
-# These tests are currently expected to fail with the default broken image.
-# They demonstrate the test infrastructure and mock server functionality.
+# For CI, the rock should be built and pushed to a registry accessible by the K8s cluster,
+# then the image URL should be passed via environment variable or configuration.
 
 import logging
 import pathlib
@@ -29,16 +27,21 @@ logger = logging.getLogger(__name__)
 
 METADATA = yaml.safe_load(pathlib.Path("charmcraft.yaml").read_text())
 
+# TODO: Replace with your working image URL when ready to run tests
+# WORKING_IMAGE = "ghcr.io/yourorg/sungather:0.3.8"
+WORKING_IMAGE = None
+
 # Mark all tests in this module as requiring a working image
 pytestmark = pytest.mark.skip(
-    reason="Requires working OCI image - default bohdans/sungather:latest is broken. "
-    "Build the rock in rock/ directory and update test to use it."
+    reason="Requires working OCI image pushed to accessible registry. "
+    "Build rock from rock/ directory, push to registry, and update WORKING_IMAGE constant."
 )
 
 
 def test_deploy_with_mock_modbus_server(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Deploy the charm with mock Modbus server and verify it reaches active status."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     # Get connection info for Modbus
     conn_info = mock_sungrow.get_connection_info("modbus")
@@ -68,7 +71,8 @@ def test_deploy_with_mock_modbus_server(charm: pathlib.Path, juju: jubilant.Juju
 
 def test_deploy_with_mock_http_server(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Deploy the charm with mock HTTP server and verify it reaches active status."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     # Get connection info for HTTP
     conn_info = mock_sungrow.get_connection_info("http")
@@ -97,7 +101,8 @@ def test_deploy_with_mock_http_server(charm: pathlib.Path, juju: jubilant.Juju, 
 
 def test_run_once_action_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Test the run-once action with a working mock server."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
@@ -124,7 +129,8 @@ def test_run_once_action_with_mock(charm: pathlib.Path, juju: jubilant.Juju, moc
 
 def test_test_connection_action_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Test the test-connection action with a working mock server."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
@@ -156,7 +162,8 @@ def test_get_inverter_info_action_with_mock(
     charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow
 ):
     """Test the get-inverter-info action with a working mock server."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
@@ -184,7 +191,8 @@ def test_get_inverter_info_action_with_mock(
 
 def test_mqtt_config_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Test MQTT configuration with mock server."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
@@ -213,7 +221,8 @@ def test_mqtt_config_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_su
 
 def test_webserver_enabled_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Test that the webserver is enabled and charm reaches active status."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
@@ -240,7 +249,8 @@ def test_webserver_enabled_with_mock(charm: pathlib.Path, juju: jubilant.Juju, m
 
 def test_config_change_with_mock(charm: pathlib.Path, juju: jubilant.Juju, mock_sungrow):
     """Test that configuration changes work correctly with mock server."""
-    resources = {"sungather-image": METADATA["resources"]["sungather-image"]["upstream-source"]}
+    image = WORKING_IMAGE or METADATA["resources"]["sungather-image"]["upstream-source"]
+    resources = {"sungather-image": image}
 
     conn_info = mock_sungrow.get_connection_info("modbus")
 
