@@ -147,7 +147,7 @@ jobs:
         run: uv tool install --with=tox-uv tox
 
       - name: Pack charm
-        run: charmcraft pack --resource sungather-image=${{ needs.build-rock.outputs.rock-image }}
+        run: charmcraft pack
 
       - name: Run integration tests
         run: uv run tox -e integration

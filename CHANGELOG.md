@@ -50,7 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI workflow now uses `uv` for faster test execution
 - CI workflow uses Concierge for simplified Juju/K8s environment setup
 - CI workflow now automatically builds and pushes rock to GitHub Container Registry
-- Integration tests now use the newly built rock image from CI
 - Integration tests clarified to verify charm robustness with broken workload images
 - Error messages now include specific `juju config` commands for resolution
 - Documentation updated with rock building and CI/CD information
@@ -62,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rock build in CI now runs with sudo to avoid chown permission errors
 - Rock build in CI now runs on ubuntu-22.04 to match the rock base
 - Docker image tagging in CI now uses loaded image ID instead of repository:tag
+- Removed unsupported `--resource` flag from `charmcraft pack` command in CI
 
 [Unreleased]: https://github.com/canonical/sungather-operator/compare/HEAD...HEAD
