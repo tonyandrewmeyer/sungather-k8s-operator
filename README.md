@@ -15,33 +15,27 @@ SunGather collects operational data from Sungrow inverters via ModBus connection
 - **Secure credential management**: Uses Juju secrets for sensitive credentials
 - **Actions**: Run data collection on-demand, test connections, and retrieve inverter information
 
-## Important: OCI Image Issue
+## OCI Image
 
-**The default OCI image (`bohdans/sungather:latest`) has missing Python dependencies and will not work.**
+This charm uses a custom rock (OCI image) that contains the SunGather application with all required dependencies. The rock is automatically built and pushed to GitHub Container Registry (`ghcr.io`) by the CI workflow.
 
-The charm will deploy successfully but the service will fail to start with:
-```
-ModuleNotFoundError: No module named 'SungrowClient'
-```
+**Note:** The default upstream image (`bohdans/sungather:latest`) specified in `charmcraft.yaml` has missing Python dependencies and will not work. You should either:
 
-The charm will show `blocked` status with the message:
-```
-service failed to start: check 'juju debug-log --include=sungather' for details, verify OCI image is correct
-```
+1. **Use the pre-built rock from CI** (recommended for production):
+   ```bash
+   juju deploy ./sungather-k8s_amd64.charm --resource sungather-image=ghcr.io/owner/sungather:latest
+   ```
 
-**Solution: Build the Working Rock Image**
+2. **Build the rock locally** (for development):
+   ```bash
+   cd rock
+   rockcraft pack
+   sudo rockcraft.skopeo --insecure-policy copy \
+     oci-archive:sungather_0.3.8_amd64.rock \
+     docker-daemon:sungather:0.3.8
+   ```
 
-This repository includes a working rock definition in the `rock/` directory. To build it:
-
-```bash
-cd rock
-rockcraft pack
-sudo rockcraft.skopeo --insecure-policy copy \
-  oci-archive:sungather_0.3.8_amd64.rock \
-  docker-daemon:sungather:0.3.8
-```
-
-See [rock/README.md](rock/README.md) for detailed instructions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed instructions on building and pushing rocks.
 
 The integration tests verify that the charm handles broken workload images gracefully - this is working as designed. The rock provides a production-ready OCI image.
 

@@ -99,12 +99,54 @@ The original tests in `test_charm.py` verify that the charm handles broken workl
 
 See [tests/integration/mock_sungrow/README.md](tests/integration/mock_sungrow/README.md) for more details about the mock server implementation.
 
+## Building the Rock
+
+The charm uses a custom rock (OCI image) that contains the SunGather application. To build the rock locally:
+
+```shell
+cd rock
+rockcraft pack
+```
+
+This creates a `.rock` file that can be converted to an OCI image and pushed to a registry.
+
+### Pushing to a Registry
+
+To push the rock to a container registry:
+
+```shell
+# Convert rock to OCI archive
+sudo rockcraft.skopeo --insecure-policy copy oci-archive:sungather_0.3.8_amd64.rock docker-archive:sungather.tar
+
+# Load into Docker
+docker load < sungather.tar
+
+# Tag with your registry
+docker tag sungather:0.3.8 ghcr.io/your-username/sungather:latest
+
+# Push to registry
+docker push ghcr.io/your-username/sungather:latest
+```
+
+### CI/CD
+
+The CI workflow automatically builds and pushes the rock to GitHub Container Registry (`ghcr.io`) on every push to `main` and for pull requests. The rock is tagged as:
+- `latest` for pushes to main
+- `pr-<number>` for pull requests
+- Git SHA for other branches
+
 ## Building the Charm
 
 Build the charm using charmcraft:
 
 ```shell
 charmcraft pack
+```
+
+To use a specific rock image when building:
+
+```shell
+charmcraft pack --resource sungather-image=ghcr.io/your-username/sungather:latest
 ```
 
 After building, analyse the charm for potential issues:

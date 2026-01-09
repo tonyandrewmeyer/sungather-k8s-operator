@@ -49,8 +49,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - CI workflow now uses `uv` for faster test execution
 - CI workflow uses Concierge for simplified Juju/K8s environment setup
+- CI workflow now automatically builds and pushes rock to GitHub Container Registry
+- Integration tests now use the newly built rock image from CI
 - Integration tests clarified to verify charm robustness with broken workload images
 - Error messages now include specific `juju config` commands for resolution
+- Documentation updated with rock building and CI/CD information
 
 ### Fixed
 - Charm filename reference in CI workflow (corrected to `sungather_amd64.charm`)

@@ -50,9 +50,78 @@ jobs:
       - name: Run unit tests
         run: uv run tox -e unit
 
+  build-rock:
+    name: Build and Push Rock
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      rock-image: ${{ steps.metadata.outputs.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rockcraft
+        run: sudo snap install rockcraft --classic
+
+      - name: Build rock
+        run: |
+          cd rock
+          rockcraft pack --verbose
+
+      - name: Extract rock to OCI archive
+        id: extract
+        run: |
+          cd rock
+          ROCK_FILE=$(ls *.rock)
+          sudo rockcraft.skopeo --insecure-policy copy oci-archive:${ROCK_FILE} docker-archive:sungather.tar
+          echo "archive=rock/sungather.tar" >> $GITHUB_OUTPUT
+
+      - name: Generate image metadata
+        id: metadata
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/sungather"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            TAG="${IMAGE_NAME}:pr-${{ github.event.pull_request.number }}"
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            TAG="${IMAGE_NAME}:latest"
+          else
+            TAG="${IMAGE_NAME}:${{ github.sha }}"
+          fi
+          echo "image=${TAG}" >> $GITHUB_OUTPUT
+          echo "Building image: ${TAG}"
+
+      - name: Load and push image
+        run: |
+          docker load < ${{ steps.extract.outputs.archive }}
+          LOADED_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
+          docker tag ${LOADED_IMAGE} ${{ steps.metadata.outputs.image }}
+          docker push ${{ steps.metadata.outputs.image }}
+
+      - name: Upload rock artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: rock
+          path: rock/*.rock
+
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    needs: build-rock
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -78,12 +147,12 @@ jobs:
         run: uv tool install --with=tox-uv tox
 
       - name: Pack charm
-        run: charmcraft pack
+        run: charmcraft pack --resource sungather-image=${{ needs.build-rock.outputs.rock-image }}
 
       - name: Run integration tests
         run: uv run tox -e integration
         env:
-          CHARM_PATH: ${{ github.workspace }}/sungather_amd64.charm
+          CHARM_PATH: ${{ github.workspace }}/sungather-k8s_amd64.charm
 
       - name: Upload charm artifact
         if: always()
