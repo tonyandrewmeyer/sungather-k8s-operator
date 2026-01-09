@@ -108,9 +108,8 @@ jobs:
 
       - name: Load and push image
         run: |
-          docker load < ${{ steps.extract.outputs.archive }}
-          LOADED_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          docker tag ${LOADED_IMAGE} ${{ steps.metadata.outputs.image }}
+          LOADED_ID=$(docker load < ${{ steps.extract.outputs.archive }} | grep -oP 'sha256:[a-f0-9]+')
+          docker tag ${LOADED_ID} ${{ steps.metadata.outputs.image }}
           docker push ${{ steps.metadata.outputs.image }}
 
       - name: Upload rock artifact

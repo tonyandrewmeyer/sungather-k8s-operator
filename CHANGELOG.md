@@ -61,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rock build in CI now uses `--destructive-mode` to avoid LXD permission issues
 - Rock build in CI now runs with sudo to avoid chown permission errors
 - Rock build in CI now runs on ubuntu-22.04 to match the rock base
+- Docker image tagging in CI now uses loaded image ID instead of repository:tag
 
 [Unreleased]: https://github.com/canonical/sungather-operator/compare/HEAD...HEAD
