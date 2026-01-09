@@ -52,7 +52,7 @@ jobs:
 
   build-rock:
     name: Build and Push Rock
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
