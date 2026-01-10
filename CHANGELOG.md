@@ -63,5 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker image tagging in CI now uses loaded image ID instead of repository:tag
 - Removed unsupported `--resource` flag from `charmcraft pack` command in CI
 - Charm pack in CI now uses `--destructive-mode` to avoid LXD daemon issues
+- Integration tests now run on ubuntu-22.04 to match the charm base
 
 [Unreleased]: https://github.com/canonical/sungather-operator/compare/HEAD...HEAD
