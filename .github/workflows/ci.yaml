@@ -120,7 +120,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-rock
     steps:
       - name: Checkout
@@ -147,7 +147,9 @@ jobs:
         run: uv tool install --with=tox-uv tox
 
       - name: Pack charm
-        run: charmcraft pack
+        run: |
+          sudo charmcraft pack --destructive-mode
+          sudo chown -R $USER:$USER .
 
       - name: Run integration tests
         run: uv run tox -e integration
