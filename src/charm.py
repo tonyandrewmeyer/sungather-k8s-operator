@@ -414,11 +414,8 @@ class SungatherCharm(ops.CharmBase):
             event.fail("Container is not ready")
             return
 
-        try:
-            info = sungather.get_inverter_info(self.container, CONFIG_PATH)
-            event.set_results(info)
-        except Exception as e:
-            event.fail(f"Failed to get inverter info: {e}")
+        info = sungather.get_inverter_info(self.container, CONFIG_PATH)
+        event.set_results(info)
 
     def _on_test_connection_action(self, event: ops.ActionEvent) -> None:
         """Handle the test-connection action."""
@@ -426,11 +423,8 @@ class SungatherCharm(ops.CharmBase):
             event.fail("Container is not ready")
             return
 
-        try:
-            result = sungather.test_connection(self.container, CONFIG_PATH)
-            event.set_results(result)
-        except Exception as e:
-            event.fail(f"Failed to test connection: {e}")
+        result = sungather.test_connection(self.container, CONFIG_PATH)
+        event.set_results(result)
 
 
 if __name__ == "__main__":  # pragma: nocover

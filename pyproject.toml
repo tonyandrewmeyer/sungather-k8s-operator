@@ -29,7 +29,7 @@ unit = [
 ]
 # Dependencies of integration tests
 integration = [
-    "jubilant",
+    "jubilant>=1.8,<2",
     "pytest",
     "PyYAML",
     "pymodbus>=3.0",
@@ -41,6 +41,7 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
+fail_under = 80
 
 [tool.pytest.ini_options]
 minversion = "6.0"

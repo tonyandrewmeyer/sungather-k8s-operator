@@ -189,3 +189,48 @@ def test_container_not_ready_defers_event(valid_config):
     # Assert - event should be deferred (implementation detail of ops.testing)
     # The charm shouldn't crash and status should remain as-is
     assert state_out is not None
+
+
+_SERVICE_LAYER = pebble.Layer(
+    {
+        "services": {
+            SERVICE_NAME: {
+                "override": "replace",
+                "command": "/usr/bin/python3.10 sungather.py -c /config/config.yaml",
+                "startup": "enabled",
+            }
+        }
+    }
+)
+
+
+def test_update_status_active_when_service_running(valid_config):
+    """update-status reports active while the service is running."""
+    ctx = testing.Context(SungatherCharm)
+    container = testing.Container(
+        CONTAINER_NAME,
+        can_connect=True,
+        layers={"sungather": _SERVICE_LAYER},
+        service_statuses={SERVICE_NAME: pebble.ServiceStatus.ACTIVE},
+    )
+    state_in = testing.State(containers={container}, config=valid_config)
+
+    state_out = ctx.run(ctx.on.update_status(), state_in)
+
+    assert state_out.unit_status == testing.ActiveStatus()
+
+
+def test_update_status_blocked_when_service_stopped(valid_config):
+    """update-status blocks when the service is not running."""
+    ctx = testing.Context(SungatherCharm)
+    container = testing.Container(
+        CONTAINER_NAME,
+        can_connect=True,
+        layers={"sungather": _SERVICE_LAYER},
+        service_statuses={SERVICE_NAME: pebble.ServiceStatus.INACTIVE},
+    )
+    state_in = testing.State(containers={container}, config=valid_config)
+
+    state_out = ctx.run(ctx.on.update_status(), state_in)
+
+    assert state_out.unit_status.name == "blocked"
