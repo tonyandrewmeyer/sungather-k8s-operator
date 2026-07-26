@@ -53,6 +53,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration tests clarified to verify charm robustness with broken workload images
 - Error messages now include specific `juju config` commands for resolution
 - Documentation updated with rock building and CI/CD information
+- `charmcraft.yaml` now declares `assumes: juju >= 3.6` and `k8s-api`, and each action
+  declares `params: {}` with `additionalProperties: false`, so incompatible controllers
+  and malformed action calls fail fast
+- Unit tests for configuration rendering and actions now drive the charm through
+  `ops.testing` state transitions instead of calling private methods on a mocked charm,
+  and they cover the action handlers and `sungather` workload helpers (coverage raised
+  from ~64% to ~91%, with an 80% floor now enforced)
+- `jubilant` pinned to `>=1.8,<2`; `uv.lock` refreshed accordingly
+- Dependabot now tracks Python dependencies via the `uv` ecosystem
+- `tox -e format` now installs tools from the locked dependency groups, matching the
+  other tox environments
+
+### Removed
+- Broad `except Exception` handlers in the action handlers and `sungather.get_inverter_info`,
+  along with dead `TYPE_CHECKING` scaffolding, in line with the project's coding guidelines
 
 ### Fixed
 - Charm filename reference in CI workflow (corrected to `sungather_amd64.charm`)

@@ -24,6 +24,11 @@ platforms:
   amd64:
   arm64:
 
+# Fail fast on incompatible controllers rather than partway through deployment.
+assumes:
+  - juju >= 3.6
+  - k8s-api
+
 parts:
   charm:
     plugin: uv
@@ -171,7 +176,13 @@ charm-libs:
 actions:
   run-once:
     description: Execute a single data collection cycle without waiting for the scheduled interval
+    params: {}
+    additionalProperties: false
   get-inverter-info:
     description: Retrieve detected inverter model and connection status
+    params: {}
+    additionalProperties: false
   test-connection:
     description: Test the connection to the inverter without starting data collection
+    params: {}
+    additionalProperties: false
