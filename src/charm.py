@@ -268,7 +268,7 @@ class SungatherCharm(ops.CharmBase):
         }
         return layer
 
-    def _generate_config_yaml(self, config: CharmConfig) -> str:  # noqa: C901
+    def _generate_config_yaml(self, config: CharmConfig) -> str:
         """Generate the SunGather config.yaml content."""
         # Build the configuration dictionary
         config_dict: dict = {

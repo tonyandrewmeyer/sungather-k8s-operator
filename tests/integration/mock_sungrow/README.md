@@ -52,11 +52,7 @@ from tests.integration.mock_sungrow import MockSungrowServer
 
 # Start both Modbus and HTTP servers
 server = MockSungrowServer(
-    host="127.0.0.1",
-    modbus_port=5020,
-    http_port=8082,
-    model="SG5K-D",
-    server_type="both"
+    host="127.0.0.1", modbus_port=5020, http_port=8082, model="SG5K-D", server_type="both"
 )
 server.start()
 
@@ -125,8 +121,8 @@ server = MockSungrowServer(server_type="both")
 Simulate different inverter models:
 
 ```python
-server = MockSungrowServer(model="SG5K-D")   # 5kW inverter
-server = MockSungrowServer(model="SG10RT")   # 10kW inverter
+server = MockSungrowServer(model="SG5K-D")  # 5kW inverter
+server = MockSungrowServer(model="SG10RT")  # 10kW inverter
 ```
 
 ## Testing Benefits

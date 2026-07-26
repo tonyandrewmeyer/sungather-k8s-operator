@@ -54,8 +54,10 @@ def test_deploy(charm, juju, mock_sungrow):
     conn_info = mock_sungrow.get_connection_info("modbus")
     # ... deploy charm with conn_info ...
 
+
 # Standalone usage
 from mock_sungrow import MockSungrowServer
+
 server = MockSungrowServer(host="0.0.0.0", server_type="both")
 server.start()
 ```
