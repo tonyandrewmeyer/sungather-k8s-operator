@@ -7,19 +7,24 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.10'
 
@@ -34,13 +39,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.10'
 
@@ -60,16 +67,18 @@ jobs:
       rock-image: ${{ steps.metadata.outputs.image }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -94,26 +103,35 @@ jobs:
 
       - name: Generate image metadata
         id: metadata
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GIT_REF: ${{ github.ref }}
+          GIT_SHA: ${{ github.sha }}
         run: |
-          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/sungather"
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            TAG="${IMAGE_NAME}:pr-${{ github.event.pull_request.number }}"
-          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          IMAGE_NAME="ghcr.io/${REPO_OWNER}/sungather"
+          if [ "${EVENT_NAME}" == "pull_request" ]; then
+            TAG="${IMAGE_NAME}:pr-${PR_NUMBER}"
+          elif [ "${GIT_REF}" == "refs/heads/main" ]; then
             TAG="${IMAGE_NAME}:latest"
           else
-            TAG="${IMAGE_NAME}:${{ github.sha }}"
+            TAG="${IMAGE_NAME}:${GIT_SHA}"
           fi
           echo "image=${TAG}" >> $GITHUB_OUTPUT
           echo "Building image: ${TAG}"
 
       - name: Load and push image
+        env:
+          ARCHIVE: ${{ steps.extract.outputs.archive }}
+          IMAGE: ${{ steps.metadata.outputs.image }}
         run: |
-          LOADED_ID=$(docker load < ${{ steps.extract.outputs.archive }} | grep -oP 'sha256:[a-f0-9]+')
-          docker tag ${LOADED_ID} ${{ steps.metadata.outputs.image }}
-          docker push ${{ steps.metadata.outputs.image }}
+          LOADED_ID=$(docker load < "${ARCHIVE}" | grep -oP 'sha256:[a-f0-9]+')
+          docker tag "${LOADED_ID}" "${IMAGE}"
+          docker push "${IMAGE}"
 
       - name: Upload rock artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: rock
           path: rock/*.rock
@@ -124,13 +142,15 @@ jobs:
     needs: build-rock
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.10'
 
@@ -158,7 +178,7 @@ jobs:
 
       - name: Upload charm artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: charm
           path: '*.charm'
@@ -171,7 +191,7 @@ jobs:
 
       - name: Upload debug logs
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: debug-logs
           path: |
