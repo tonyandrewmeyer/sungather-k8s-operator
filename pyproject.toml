@@ -33,7 +33,7 @@ integration = [
     "jubilant>=1.14.0,<2",
     "pytest",
     "PyYAML",
-    "pymodbus>=3.16.1",
+    "pymodbus>=3.16.2",
 ]
 
 # Testing tools configuration
